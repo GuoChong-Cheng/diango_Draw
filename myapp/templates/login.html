@@ -1,0 +1,99 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1-dist/css/bootstrap.css' %}">
+    <style>
+        .account {
+            width: 400px;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            box-shadow: 5px 5px 20px #aaa;
+
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 100px;
+            padding: 20px 40px;
+
+        }
+
+        .account h2 {
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="account">
+        <h2>用户登陆</h2>
+        <form method="post" action='/login/'>
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label>{{field.label}}</label>
+                {{ field}}
+            </div>
+            {% endfor %}
+            <div class='form-group'>
+                <label for="id_code">图片验证码</label>
+                <div class='row'>
+                    <div class='col-xs-7'>
+                        <input type="text" name='code' class='form-control' placeholder='请输入图片' id='id_code'>
+                        <span style='color: red;'></span>
+                    </div>
+                    <div class='col-xs-5'>
+                        <img src="{% static 'img/code.png' %}" alt="图片" onclick="imgCode()" id='img'>
+                    </div>
+                </div>
+            </div>
+
+            <input type="submit" value="登 陆" class="btn btn-primary">
+        </form>
+
+    </div>
+
+    
+<script src="{% static  'js/echarts.min.js'%}"></script>
+<script src="{% static  'js/jquery-3.7.0.min.js'%}"></script>
+
+<script>
+
+    function imgCode(){
+
+      $.ajax({
+         url:'/img/',
+         type: 'get',
+         dataType: 'html',
+         success: function(response) {
+           // 在成功回调函数中处理返回的结果
+           // response 参数包含了后端返回的渲染模板的HTML内容
+           
+           // 使用 document.write() 方法将返回的 HTML 内容覆盖整个页面
+           document.open();
+           document.write(response);
+           
+
+
+            document.close();
+
+            var imageUrl = $('#img').attr('src');
+            var newImageUrl = imageUrl + '?timestamp=' + new Date().getTime();
+            console.log(newImageUrl )
+            $("#img").attr("src", newImageUrl);
+
+
+         }
+      })
+      
+    }
+
+ </script>
+</body>
+
+</html>

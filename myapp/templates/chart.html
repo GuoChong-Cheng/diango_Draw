@@ -1,0 +1,123 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Document</title>
+   <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1-dist/css/bootstrap.css' %}">
+</head>
+
+
+
+<div class="input-group" style="display: inline-block;">
+   <form action='/chart/data/' method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="file" class="form-control" name="txt_file">
+      <br>
+      <input type="submit" class="form-control" value="提 交">
+      <button type="button" class="form-control" onclick="draw()">画图</button>
+   </form>
+</div>
+<div class="input-group" style="display: inline-block;">
+   
+
+      <button type="button" class="form-control" onclick="fftfilter()" id = 'fft'>FFT</button>
+      <input type="text" id='maxf' class="col-md-6" placeholder='上限截至频率' >
+      <input type="text"  id='minf' class="col-md-6" placeholder='下限截至频率' >
+      
+      <br>
+      <button type="button" class="form-control" onclick="filter()" id = 'filter'>滤波</button>
+
+</div>
+
+
+<div id="m" style="width: 1600px;height:700px;"></div>
+
+<script src="{% static  'js/echarts.min.js'%}"></script>
+<script src="{% static  'js/jquery-3.7.0.min.js'%}"></script>
+
+<script>
+   // 基于准备好的dom，初始化echarts实例
+   var myChart = echarts.init(document.getElementById('m'));
+
+   // 指定图表的配置项和数据
+   var option = {
+      xAxis: {
+        type: 'value',
+        
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [
+      {
+          data: [
+              [0, 0],
+          ],
+          type: 'line'
+      }
+  ]
+    };
+
+   // 使用刚指定的配置项和数据显示图表。
+   myChart.setOption(option);
+    function draw(){
+      $.ajax({
+         url:'/chart/draw/',
+         type: 'get',
+         dataType:'JSON',
+         success:function(req){
+            option.series = req.data;
+            myChart.setOption(option);
+         }
+      })
+    };
+    function filter(){
+      var maxf = $('#maxf').val();
+      var minf = $('#minf').val();
+
+
+      $.ajax({
+         url:'/chart/filter/',
+         type: 'get',
+         data:{
+            maxf: maxf,
+            minf: minf
+         },
+         dataType:'JSON',
+         success:function(req){
+            option.series = req.data;
+            myChart.setOption(option);
+         }
+      })
+    };
+
+   function fftfilter(){
+      $.ajax({
+         url: '/chart/fft/',
+         method: 'get',
+         dataType:'JSON',
+         success: function(req) {
+             // 处理后端响应
+             option.series = req.data;
+             myChart.setOption(option);
+             
+         },
+         error: function(xhr, status, error) {
+             // 处理错误
+         }
+     });
+
+   }
+ </script>
+<!-- <script src="../statics/js/jquery-3.7.0.min.js"></script>
+    <script src="../statics/plugins/bootstrap-3.4.1-dist/js/bootstrap.js"></script> -->
+
+
+</body>
+
+</html>
